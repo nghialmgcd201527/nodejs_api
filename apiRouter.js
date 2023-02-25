@@ -2,19 +2,19 @@ const express = require('express')
 var router = express.Router()
 
 router.get('/', (req, res) => {
-    res.json('Nghia dang o router 1')
+    res.json('router 1 user GET')
 })
 
-router.get('/:id', (req, res) => {
-    res.json('toi da lay ra id: ' + req.params.id)
+router.post('/', (req, res) => {
+    res.json('router 1 user POST ' + req.body.username + ' ' + req.headers.data)
 })
 
-router.get('/product/', (req, res) => {
-    res.json('Nghia dang lay san pham')
+router.put('/', (req, res) => {
+    res.json('router 1 user PUT')
 })
 
-router.get('/cart/', (req, res) => {
-    res.json('Nghia dang gom gio hang')
+router.delete('/', (req, res) => {
+    res.json('router 1 user DELETE')
 })
 
 module.exports = router
