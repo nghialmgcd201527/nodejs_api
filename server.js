@@ -49,6 +49,10 @@ app.post('/login', (req, res, next) => {
     })
 })
 
+var accountRouter = require('./routers/account')
+
+app.use('/api/account/', accountRouter)
+
 app.get('/', (req, res, next) => {
     res.json('HOME')
 })
