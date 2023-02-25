@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
+const path = require('path')
 var bodyParser = require('body-parser')
 const AccountModel = require('./models/account')
 const port = 3000
 
 var router = require('./apiRouter')
+
+app.use('/public', express.static(path.join(__dirname, '/public')))
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -53,8 +56,9 @@ var accountRouter = require('./routers/account')
 
 app.use('/api/account/', accountRouter)
 
-app.get('/', (req, res, next) => {
-    res.json('HOME')
+app.get('/', (req, res) => {
+    var duongDan = path.join(__dirname, 'home.html')
+    res.sendFile(duongDan)
 })
 
 app.listen(port, () => {
