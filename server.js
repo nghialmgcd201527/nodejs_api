@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 var bodyParser = require('body-parser')
+const AccountModel = require('./models/account')
 const port = 3000
 
 var router = require('./apiRouter')
@@ -8,11 +9,30 @@ var router = require('./apiRouter')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
-app.use('/admin/api1/', router)
-app.use('/api1/', router)
+app.post('/register', (req, res, next) => {
+    var username = req.body.username
+    var password = req.body.password
 
-app.get('/', (req, res) => {
-    res.send('Say something')
+    AccountModel.findOne({
+        username: username
+    }).then((data) => {
+        if (data) {
+            res.json("Username already exists")
+        } else {
+            return AccountModel.create({
+                username: username,
+                password: password
+            })
+        }
+    }).then((data) => {
+        res.json("Successfully")
+    }).catch((err) => {
+        res.status(500).json("Error")
+    })
+})
+
+app.get('/', (req, res, next) => {
+    res.json('HOME')
 })
 
 app.listen(port, () => {
