@@ -31,6 +31,24 @@ app.post('/register', (req, res, next) => {
     })
 })
 
+app.post('/login', (req, res, next) => {
+    var username = req.body.username
+    var password = req.body.password
+
+    AccountModel.findOne({
+        username: username,
+        password: password
+    }).then((data) => {
+        if (data) {
+            res.json("loged in Successfully")
+        } else {
+            res.status(400).json("Username or password is incorrect")
+        }
+    }).catch((err) => {
+        res.status(300).json("Server Error")
+    })
+})
+
 app.get('/', (req, res, next) => {
     res.json('HOME')
 })
