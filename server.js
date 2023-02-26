@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const path = require('path')
 var bodyParser = require('body-parser')
+const jwt = require('jsonwebtoken')
+var cookieParser = require('cookie-parser')
 const port = 3000
 
 var router = require('./apiRouter')
@@ -10,6 +12,7 @@ app.use('/public', express.static(path.join(__dirname, '/public')))
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(cookieParser())
 
 const AccountModel = require('./models/account')
 const PAGE_SIZE = 2
@@ -21,46 +24,6 @@ app.use((req, res, next) => {
     next()
 })
 
-app.post('/register', (req, res, next) => {
-    var username = req.body.username
-    var password = req.body.password
-
-    AccountModel.findOne({
-        username: username
-    }).then((data) => {
-        if (data) {
-            res.json("Username already exists")
-        } else {
-            return AccountModel.create({
-                username: username,
-                password: password
-            })
-        }
-    }).then((data) => {
-        res.json("Successfully")
-    }).catch((err) => {
-        res.status(500).json("Error")
-    })
-})
-
-app.post('/login', (req, res, next) => {
-    var username = req.body.username
-    var password = req.body.password
-
-    AccountModel.findOne({
-        username: username,
-        password: password
-    }).then((data) => {
-        if (data) {
-            res.json("loged in Successfully")
-        } else {
-            res.status(400).json("Username or password is incorrect")
-        }
-    }).catch((err) => {
-        res.status(300).json("Server Error")
-    })
-})
-
 app.get('/home', (req, res, next) => {
     res.sendFile(path.join(__dirname, 'index.html'))
 })
@@ -68,11 +31,6 @@ app.get('/home', (req, res, next) => {
 var accountRouter = require('./routers/account')
 
 app.use('/api/account/', accountRouter)
-
-app.get('/', (req, res) => {
-    var duongDan = path.join(__dirname, 'home.html')
-    res.sendFile(duongDan)
-})
 
 app.get('/user', (req, res, next) => {
     var page = req.query.page
@@ -103,6 +61,50 @@ app.get('/user', (req, res, next) => {
             res.status(500).json("Error")
         })
     }
+})
+
+//Get Login
+app.get('/login', (req, res, next) => {
+    res.sendFile(path.join(__dirname, 'login.html'))
+})
+
+//Post Login
+app.post('/login', (req, res, next) => {
+    var username = req.body.username
+    var password = req.body.password
+
+    AccountModel.findOne({
+        username: username,
+        password: password
+    })
+        .then((data) => {
+            if (data) {
+                var token = jwt.sign({ _id: data._id }, 'mk')
+                return res.json({
+                    message: 'thanh cong',
+                    token: token
+                })
+            } else {
+                return res.status(500).json("Error")
+            }
+        })
+        .catch((err) => {
+            res.status(500).json("Error")
+        })
+})
+
+app.get('/private', (req, res, next) => {
+    try {
+        var token = req.cookies.token
+        var ketqua = jwt.verify(token, 'mk')
+        if (ketqua) {
+            next()
+        }
+    } catch (error) {
+        return res.redirect('/login')
+    }
+}, (req, res, next) => {
+    res.json('welcome')
 })
 
 app.listen(port, () => {
