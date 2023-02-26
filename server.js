@@ -14,6 +14,13 @@ app.use(bodyParser.urlencoded({ extended: false }))
 const AccountModel = require('./models/account')
 const PAGE_SIZE = 2
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    next()
+})
+
 app.post('/register', (req, res, next) => {
     var username = req.body.username
     var password = req.body.password
