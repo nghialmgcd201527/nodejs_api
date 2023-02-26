@@ -54,6 +54,10 @@ app.post('/login', (req, res, next) => {
     })
 })
 
+app.get('/home', (req, res, next) => {
+    res.sendFile(path.join(__dirname, 'index.html'))
+})
+
 var accountRouter = require('./routers/account')
 
 app.use('/api/account/', accountRouter)
@@ -73,7 +77,14 @@ app.get('/user', (req, res, next) => {
             .skip(skip)
             .limit(PAGE_SIZE)
             .then((data) => {
-                res.json(data)
+                AccountModel.countDocuments({}).then((count) => {
+                    var totalPage = Math.ceil(count / PAGE_SIZE)
+                    res.json({
+                        total: count,
+                        totalPage: totalPage,
+                        data: data
+                    })
+                })
             })
             .catch((err) => {
                 res.status(500).json("Error")
