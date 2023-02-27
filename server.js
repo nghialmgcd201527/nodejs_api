@@ -24,7 +24,7 @@ app.use((req, res, next) => {
     next()
 })
 
-app.get('/home', (req, res, next) => {
+app.get('/homepage', (req, res, next) => {
     res.sendFile(path.join(__dirname, 'index.html'))
 })
 
@@ -175,6 +175,35 @@ app.get('/teacher', checkLogin, checkManager, (req, res, next) => {
     next()
 }, (req, res, next) => {
     res.json('teacher')
+})
+
+app.get('/home', (req, res, next) => {
+    var token = req.cookies.token
+    next()
+}, (req, res, next) => {
+    res.sendFile(path.join(__dirname, 'home.html'))
+})
+
+app.post('/edit', (req, res, next) => {
+    var token = req.headers.cookie.split('=')[1]
+    var decodeToken = jwt.verify(token, 'mk')
+    AccountModel.findOne({ _id: decodeToken._id })
+        .then((data) => {
+            if (data.length === 0) {
+                return res.redirect('/login')
+            } else {
+                if (data.role === 'manager') {
+                    next()
+                } else {
+                    return res.json({
+                        error: true,
+                        message: 'ban khong co quyen'
+                    })
+                }
+            }
+        })
+}, (req, res, next) => {
+    res.json('sua thanh cong')
 })
 
 app.listen(port, () => {
