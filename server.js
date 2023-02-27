@@ -107,6 +107,76 @@ app.get('/private', (req, res, next) => {
     res.json('welcome')
 })
 
+var checkStudent = (req, res, next) => {
+    var role = req.data.role
+    if (role === 'student' || role === 'teacher' || role === 'manager') {
+        next()
+    } else {
+        res.json('ban khong co quyen')
+    }
+}
+
+var checkTeacher = (req, res, next) => {
+    var role = req.data.role
+    if (role === 'teacher' || role === 'manager') {
+        next()
+    } else {
+        res.json('ban khong co quyen')
+    }
+}
+
+var checkManager = (req, res, next) => {
+    var role = req.data.role
+    if (role === 'manager') {
+        next()
+    } else {
+        res.json('ban khong co quyen')
+    }
+}
+
+var checkLogin = (req, res, next) => {
+    //check login
+    try {
+        var token = req.cookies.token
+        var idUser = jwt.verify(token, 'mk')
+        AccountModel.findOne({
+            _id: idUser
+        })
+            .then((data) => {
+                if (data) {
+                    req.data = data
+                    next()
+                } else {
+                    res.json('ban khong co quyen')
+                }
+            })
+            .catch((err) => {
+                res.status(500).json("Error")
+            })
+    } catch (err) {
+        res.status(500).json("token ko hop le")
+    }
+}
+
+app.get('/task', checkLogin, checkStudent, (req, res, next) => {
+    console.log(req.data)
+    res.json('all task')
+})
+
+app.get('/student', checkLogin, checkTeacher, (req, res, next) => {
+    //check login
+    next()
+}, (req, res, next) => {
+    res.json('student')
+})
+
+app.get('/teacher', checkLogin, checkManager, (req, res, next) => {
+    //check login
+    next()
+}, (req, res, next) => {
+    res.json('teacher')
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
